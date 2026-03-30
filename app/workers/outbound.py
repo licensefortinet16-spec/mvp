@@ -4,7 +4,6 @@ from arq import Retry
 from app.core.logging import logger
 from app.services.meta import send_whatsapp_message
 from app.core.redis import get_arq_pool
-from app.core.queues import QUEUE_DLQ
 
 
 async def process_outbound_message(ctx, payload: dict):
@@ -52,8 +51,7 @@ async def process_outbound_message(ctx, payload: dict):
             await arq_pool.enqueue_job(
                 "handle_dlq_inbound",
                 payload=payload,
-                error_msg=f"Max retries reached. Last status: {status_code}",
-                _queue_name=QUEUE_DLQ
+                error_msg=f"Max retries reached. Last status: {status_code}"
             )
             return {"status": "failed", "reason": "max_retries"}
             
@@ -71,7 +69,6 @@ async def process_outbound_message(ctx, payload: dict):
     await arq_pool.enqueue_job(
         "handle_dlq_inbound",
         payload=payload,
-        error_msg=f"Fatal 4xx error: {status_code}",
-        _queue_name=QUEUE_DLQ
+        error_msg=f"Fatal 4xx error: {status_code}"
     )
     return {"status": "failed", "reason": f"fatal_{status_code}"}

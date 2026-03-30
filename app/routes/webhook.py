@@ -3,7 +3,6 @@ from app.core.config import settings
 from app.core.logging import logger
 from app.core.security import verify_meta_signature
 from app.core.redis import redis_client, get_arq_pool
-from app.core.queues import QUEUE_INBOUND
 
 router = APIRouter()
 
@@ -72,8 +71,7 @@ async def receive_webhook(
                     logger.info("webhook.enqueued", message_id=msg_id)
                     await arq_pool.enqueue_job(
                         "process_inbound_message",
-                        payload={"waba_id": waba_id, "message": message},
-                        _queue_name=QUEUE_INBOUND
+                        payload={"waba_id": waba_id, "message": message}
                     )
     
     return {"status": "received"}

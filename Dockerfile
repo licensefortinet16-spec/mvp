@@ -19,5 +19,5 @@ COPY . .
 # Expõe porta (Railway injeta PORT)
 EXPOSE 8000
 
-# Start command default (API), workers irão sobrescrever via Railway UI
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Start command unificado (API + Worker ARQ)
+CMD ["./start.sh"]

@@ -1,7 +1,6 @@
 from arq import Retry
 from app.core.logging import logger
 from app.core.redis import redis_client, get_arq_pool
-from app.core.queues import QUEUE_OUTBOUND, QUEUE_DLQ
 
 async def process_inbound_message(ctx, payload: dict):
     """
@@ -46,8 +45,7 @@ async def process_inbound_message(ctx, payload: dict):
                 "waba_id": waba_id,
                 "to": user_phone,
                 "text": f"Echo: {body}"
-            },
-            _queue_name=QUEUE_OUTBOUND
+            }
         )
         
         logger.info("worker.inbound.completed", job_id=job_id)
@@ -61,8 +59,7 @@ async def process_inbound_message(ctx, payload: dict):
             await arq_pool.enqueue_job(
                 "handle_dlq_inbound",
                 payload=payload,
-                error_msg=str(e),
-                _queue_name=QUEUE_DLQ
+                error_msg=str(e)
             )
         raise Retry(defer=1)  # Tenta novamente em 1s (backoff simples)
 

@@ -52,24 +52,22 @@ uvicorn app.main:app --reload
 curl http://localhost:8000/health
 ```
 
-## Deploy (Railway)
+## Deploy (Railway - Free Tier)
 
 ### 1. Criar o Projeto
 - No painel, crie um novo projeto
 - Adicione as instâncias gerenciadas do PostgreSQL e Redis (`New > Database > PostgreSQL`, `New > Database > Redis`)
-- Conecte seu repositório GitHub para o Web/API. Railway vai buildar via Dockerfile e rodar o `railway.toml`.
+- Conecte seu repositório GitHub (`licensefortinet16-spec/mvp`). O Railway vai identificar o `Dockerfile` e `railway.toml`.
 
-### 2. Configurar Workers
-O projeto exige 3 workers simultâneos. No Railway, adicione 3 **Empty Services** e aponte para o mesmo repositório, mas mude o **Start Command** deles:
-
-- Worker Inbound: `arq app.workers.main.WorkerInbound`
-- Worker Outbound: `arq app.workers.main.WorkerOutbound`
-- Worker DLQ: `arq app.workers.main.WorkerDLQ`
+### 2. Configuração Unificada
+O projeto foi ajustado para rodar a **API Web** e os **Workers ARQ** no mesmo container via `start.sh` (economizando serviços no plano Free). Você **não precisa** criar serviços adicionais de worker no painel.
 
 ### 3. Variáveis de Ambiente
-Copie todas as variáveis do `.env` para todos os 4 serviços (API + os 3 Workers), ajustando o `DATABASE_URL` e `REDIS_URL` para as internas do Railway (`${{Redis.REDIS_URL}}`, etc).
+Na aba "Variables" do seu serviço principal conectado ao GitHub, adicione todas as variáveis do seu `.env` local.
+- `DATABASE_URL` = (Referencie do serviço Postgres, clique em "Reference" -> `${{Postgres.DATABASE_URL}}`)
+- `REDIS_URL` = (Referencie do serviço Redis -> `${{Redis.REDIS_URL}}`)
 
 ### 4. Últimos Ajustes
-- Rode as migrations: `alembic upgrade head` no shell do serviço Web
-- Rode o seeder: `python3 scripts/seed.py` para criar o seu tenant com WABA_ID via shell
-- Mude a URL na tela de WhatsApp Settings da Meta for Developers para: `https://seu-dominio-railway.app/webhook`
+- Rode as migrations: No terminal interno do container no painel do Railway, digite `alembic upgrade head`.
+- Crie o seu logista de teste: No terminal interno, digite `python3 scripts/seed.py`.
+- Copie o domínio gerado pelo Railway (ex: `https://seu-dominio-railway.app/webhook`) e cadastre na Meta for Developers, usando o `META_WEBHOOK_SECRET` que você colocou nas Variáveis.
