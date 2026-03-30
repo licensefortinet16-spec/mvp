@@ -1,5 +1,7 @@
-#!/bin/bash
 set -e
+
+echo "Executando migrações do banco de dados (Alembic)..."
+alembic upgrade head
 
 echo "Iniciando Worker ARQ unificado em background..."
 arq app.workers.main.WorkerSettings &
