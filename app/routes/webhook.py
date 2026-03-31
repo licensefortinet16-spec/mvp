@@ -29,14 +29,20 @@ async def receive_webhook(
 ):
     """Recebimento de mensagens WhatsApp (POST) com validação HMAC."""
     raw_body = await request.body()
+    print(f"\n[DEBUG URGENTE] RECEBEMOS UM POST NO WEBHOOK!")
+    print(f"[DEBUG URGENTE] Headers X-Hub-Signature-256: {x_hub_signature_256}")
+    print(f"[DEBUG URGENTE] Raw Body: {raw_body.decode('utf-8')[:500]}")
     
     if not verify_meta_signature(raw_body, x_hub_signature_256):
+        print("[DEBUG URGENTE] FALHA NA ASSINATURA HMAC!")
         logger.warning("webhook.signature_invalid", signature=x_hub_signature_256)
         raise HTTPException(status_code=403, detail="Invalid signature")
         
     try:
         body = await request.json()
-    except Exception:
+        print(f"[DEBUG URGENTE] JSON BODY PARSEADO: {body}")
+    except Exception as e:
+        print(f"[DEBUG URGENTE] FALHA NO PARSE DO JSON! Erro: {e}")
         logger.error("webhook.invalid_json")
         raise HTTPException(status_code=400, detail="Invalid JSON")
         
