@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, HTTPException, Query, Header
+from fastapi.responses import PlainTextResponse
 from app.core.config import settings
 from app.core.logging import logger
 from app.core.security import verify_meta_signature
@@ -16,7 +17,7 @@ async def verify_webhook(
     """Verificação do webhook pela Meta (GET)."""
     if hub_mode == "subscribe" and hub_verify_token == settings.meta_webhook_secret:
         logger.info("webhook.verified")
-        return int(hub_challenge)
+        return PlainTextResponse(str(hub_challenge))
     logger.warning("webhook.verify_failed", token=hub_verify_token)
     raise HTTPException(status_code=403, detail="Forbidden")
 
