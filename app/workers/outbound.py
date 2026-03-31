@@ -38,8 +38,7 @@ async def process_outbound_message(ctx, payload: dict):
         await arq_pool.enqueue_job(
             "handle_dlq_inbound", # Reusando a mesma DLQ function para simplificar logging MVP
             payload=payload,
-            error_msg="Error 131030: Number not registered",
-            _queue_name=QUEUE_DLQ
+            error_msg="Error 131030: Number not registered"
         )
         return {"status": "failed", "reason": "131030"}
 
@@ -64,6 +63,8 @@ async def process_outbound_message(ctx, payload: dict):
         raise Retry(defer=retry_delay)
         
     # Falhas 4xx irreversíveis sem retry (ex: 400 Bad Request)
+    print(f"\n[URGENTE] FALHA AO ENVIAR MENSAGEM (HTTP {status_code})")
+    print(f"[URGENTE] CORPO DO ERRO DA META: {response_data}\n")
     logger.error("worker.outbound.fatal_error", status=status_code, response=response_data)
     arq_pool = await get_arq_pool()
     await arq_pool.enqueue_job(
