@@ -6,6 +6,7 @@ class Settings(BaseSettings):
 
     # Meta / WhatsApp
     meta_webhook_secret: str
+    meta_app_secret: str  # Chave secreta real do App para assinatura HMAC
     meta_access_token: str
     meta_phone_number_id: str
     meta_waba_id: str

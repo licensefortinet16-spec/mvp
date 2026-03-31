@@ -11,7 +11,7 @@ def verify_meta_signature(payload: bytes, signature_header: str) -> bool:
         return False
         
     signature = signature_header.split("sha256=")[1]
-    secret = settings.meta_webhook_secret.encode("utf-8")
+    secret = settings.meta_app_secret.encode("utf-8")
     
     expected_signature = hmac.new(
         secret,
